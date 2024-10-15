@@ -6,50 +6,44 @@
 //
 
 import SwiftUI
-import SwiftData
+import FirebaseCore
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    // Créez une instance de FirestoreService ici
+    private let firestoreService = FirestoreService()
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        TabView {
+            NavigationView {
+                ShoppingListView(firestoreService: firestoreService)
+                    .navigationTitle("Shopping List")
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            .tabItem {
+                Label("Shopping", systemImage: "cart")
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            
+            NavigationView {
+                Text("Calendar View")
+                    .navigationTitle("Family Calendar")
+            }
+            .tabItem {
+                Label("Calendar", systemImage: "calendar")
+            }
+            
+            NavigationView {
+                Text("Tasks View")
+                    .navigationTitle("Family Tasks")
+            }
+            .tabItem {
+                Label("Tasks", systemImage: "checklist")
+            }
+            
+            NavigationView {
+                Text("Settings View")
+                    .navigationTitle("Settings")
+            }
+            .tabItem {
+                Label("Settings", systemImage: "gear")
             }
         }
     }
@@ -57,5 +51,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
